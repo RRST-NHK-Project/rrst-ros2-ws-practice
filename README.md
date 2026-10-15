@@ -2,28 +2,7 @@
 
 # **rrst-ros2-workspace**
 ## 1. Overview
-This is the main repository for the NHK Project, RRST, at Ritsumeikan University, containing the ROS 2 packages and microcontroller-side programs currently in use.
-
-|  | Description | Build Status |
-|---|---|---|
-| **main** | Stable branch (verified) | [![ROS 2 Jazzy Build](https://github.com/RRST-NHK-Project/rrst-ros2-ws/actions/workflows/main_jazzy_build_and_test.yml/badge.svg?branch=main)](https://github.com/RRST-NHK-Project/rrst-ros2-ws/actions/workflows/main_jazzy_build_and_test.yml) |
-| **develop** | Latest development branch (in progress) | [![ROS 2 Jazzy Build](https://github.com/RRST-NHK-Project/rrst-ros2-ws/actions/workflows/main_jazzy_build_and_test.yml/badge.svg?branch=develop&event=push)](https://github.com/RRST-NHK-Project/rrst-ros2-ws/actions/workflows/main_jazzy_build_and_test.yml) |
-| **Docker** | Docker build (develop) | [![Docker Build](https://github.com/RRST-NHK-Project/rrst-ros2-ws/actions/workflows/docker-publish.yml/badge.svg?branch=develop)](https://github.com/RRST-NHK-Project/rrst-ros2-ws/actions/workflows/docker-publish.yml) |
-
----
-
-## 2. System Requirements
-
-| Item | Description |
-|:---|:---|
-| OS | Ubuntu 24.04 LTS |
-| ROS | ROS 2 Jazzy |
-| RAM | 16 GB or more recommended |
-
-> **Note**: If the build process freezes, it may be due to insufficient RAM.  
-> Consider adding swap space or limiting the number of build threads.
-
----
+専門講習で使うリポジトリです。メインリポジトリのフォークになっています。
 
 ## 3. Getting Started
 
@@ -37,13 +16,13 @@ Skip this step if the workspace has already been created.
 **main (stable)**
 
     cd ~/ros2_ws/src
-    git clone https://github.com/RRST-NHK-Project/rrst-ros2-ws.git .
+    git clone git@github.com:RRST-NHK-Project/rrst-ros2-ws-practice.git .
     git submodule update --init --recursive
 
 **develop (latest, in progress)**
 
     cd ~/ros2_ws/src
-    git clone https://github.com/RRST-NHK-Project/rrst-ros2-ws.git -b develop .
+    git git@github.com:RRST-NHK-Project/rrst-ros2-ws-practice.git -b develop .
     git submodule update --init --recursive
 
 ### 3.3 Build
