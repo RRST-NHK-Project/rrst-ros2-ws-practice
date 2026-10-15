@@ -22,7 +22,7 @@ Skip this step if the workspace has already been created.
 **develop (latest, in progress)**
 
     cd ~/ros2_ws/src
-    git git@github.com:RRST-NHK-Project/rrst-ros2-ws-practice.git -b develop .
+    git clone git@github.com:RRST-NHK-Project/rrst-ros2-ws-practice.git -b develop .
     git submodule update --init --recursive
 
 ### 3.3 Build
