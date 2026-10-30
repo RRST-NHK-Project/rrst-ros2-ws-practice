@@ -10,3 +10,6 @@
 [submodule "ros2can"]
 	path = ros2can
 	url = git@github.com:RRST-NHK-Project/ros2can.git
+[submodule "virtual_ps4"]
+	path = virtual_ps4
+	url = git@github.com:KouTashi/virtual_ps4.git
