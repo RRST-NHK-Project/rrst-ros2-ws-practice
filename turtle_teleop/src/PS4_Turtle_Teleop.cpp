@@ -2,7 +2,8 @@
 PS4コントローラーでturtlesimを操作するノード（講習用の雛形）
 teleop_tools/src/Serial_Bridge_Host.cpp と同じ構成にしてある
 docs/turtle_teleop講習.pptx の問題に合わせて書き換えていくこと
-Copyright (c) 2025 RRST-NHK-Project. All rights reserved.
+Copyright (c) 2025 RRST-NHK-Project
+SPDX-License-Identifier: MIT
 */
 
 #include <chrono>

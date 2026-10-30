@@ -1,7 +1,8 @@
 /*
 PS4コントローラーでturtlesimを操作するノード（解答例：問題1〜6）
 雛形 turtle_teleop/src/PS4_Turtle_Teleop.cpp に docs/turtle_teleop講習.pptx の問題1〜6を実装したもの
-Copyright (c) 2025 RRST-NHK-Project. All rights reserved.
+Copyright (c) 2025 RRST-NHK-Project
+SPDX-License-Identifier: MIT
 */
 
 #include <chrono>
