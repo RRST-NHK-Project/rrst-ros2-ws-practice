@@ -11,7 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
-add_executable(ps4_turtle src/PS4_Turtle_Teleop.cpp)
+add_executable(ps4_turtle src/PS4_Turtle_Teleop_task4.cpp)
 ament_target_dependencies(ps4_turtle rclcpp sensor_msgs geometry_msgs)
 
 # インストール設定
