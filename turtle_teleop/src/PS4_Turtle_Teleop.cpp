@@ -60,7 +60,7 @@ private:
     void ps4_listener_callback(const sensor_msgs::msg::Joy::SharedPtr msg) {
 
         // コントローラーの入力を取得、使う入力のコメントアウトを外す
-        float LS_X = msg->axes[0];  // 左: +1
+        //float LS_X = msg->axes[0];  // 左: +1
         float LS_Y = msg->axes[1];  // 上: +1
         float RS_X = msg->axes[3];  // 左: +1
         // float RS_Y = msg->axes[4];  // 上: +1
@@ -76,16 +76,29 @@ private:
         // bool DOWN = msg->axes[7] == -1.0;
 
         // bool L1 = msg->buttons[4];
-        // bool R1 = msg->buttons[5];
+        bool R1 = msg->buttons[5];
 
         // bool SHARE = msg->buttons[8];
         // bool OPTION = msg->buttons[9];
         // bool PS = msg->buttons[10];
 
         // 以降、twist_を操作する
+        // デッドゾーン処理
+        if (std::fabs(LS_Y) < DEADZONE_L) {
+            LS_Y = 0.0;
+        }
 
-        twist_.linear.x = LS_Y * MAX_LINEAR;
-        twist_.angular.z = RS_X * MAX_ANGULAR;
+        if (std::fabs(RS_X) < DEADZONE_R) {
+            RS_X = 0.0;
+        }
+
+        // R1を押している間は2倍速
+        double speed_multiplier = R1 ? 2.0 : 1.0;
+
+        // 速度指令
+        twist_.linear.x = LS_Y * MAX_LINEAR * speed_multiplier;
+        twist_.angular.z = RS_X * MAX_ANGULAR * speed_multiplier;
+
 
         // デバッグ用
         // RCLCPP_INFO(get_logger(), "linear.x=%.2f, angular.z=%.2f",
