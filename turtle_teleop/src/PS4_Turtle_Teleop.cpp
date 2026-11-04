@@ -76,7 +76,7 @@ private:
         // bool DOWN = msg->axes[7] == -1.0;
 
         // bool L1 = msg->buttons[4];
-        // bool R1 = msg->buttons[5];
+        bool R1 = msg->buttons[5];
 
         // bool SHARE = msg->buttons[8];
         // bool OPTION = msg->buttons[9];
@@ -84,12 +84,25 @@ private:
 
         // 以降、twist_を操作する
 
+        twist_.linear.x = LS_Y * DEADZONE_L;
 
-        twist_.linear.x = LS_Y *MAX_LINEAR;
+        if (std::fabs(RS_X) < DEADZONE_R){
+            RS_X = 0.0;
+        }
+       
         twist_.angular.z = RS_X * MAX_ANGULAR;
+        
+        // 三項演算子で書く
+        double scale = R1 ? 2.0 : 1.0;
+        // if 文で書いてもよい
+        //double scale = 1.0;
+
+        //if (R1) {
+        //    scale = 2.0;
+        //}
 
         // デバッグ用
-        // RCLCPP_INFO(get_logger(), "linear.x=%.2f, angular.z=%.2f",
+        // RCLCPP_INFO(getMAX_ANGULAR_logger(), "linear.x=%.2f, angular.z=%.2f",
         //             twist_.linear.x, twist_.angular.z);
 
         // twist_の操作ここまで
