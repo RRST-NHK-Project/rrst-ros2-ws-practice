@@ -14,6 +14,7 @@ SPDX-License-Identifier: MIT
 #include "geometry_msgs/msg/twist.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joy.hpp"
+#include "std_srvs/srv/empty.hpp"
 
 #define PUBLISH_RATE_MS 20 // publish周期(ms)
 
@@ -48,10 +49,13 @@ public:
         publisher_ = this->create_publisher<geometry_msgs::msg::Twist>(
             "turtle1/cmd_vel", 10);
 
+        //これもturtlesimにpublish?
+        reset_client_ = this->create_client<std_srvs::srv::Empty>("reset");  
         // timer_callbackを呼び出すタイマーを作成
         timer_ = create_wall_timer(
             std::chrono::milliseconds(PUBLISH_RATE_MS),
             std::bind(&PS4TurtleTeleop::publisher_timer_callback, this));
+
 
         RCLCPP_INFO(get_logger(), "ps4_turtle_teleop started.");
     }
@@ -82,8 +86,13 @@ private:
 
         // bool SHARE = msg->buttons[8];
         // bool OPTION = msg->buttons[9];
-        // bool PS = msg->buttons[10];
+        bool PS = msg->buttons[10];
+        static bool Last_PS = false;
 
+        if (PS && !Last_PS) {  // PSボタンが押された瞬間リセット
+            reset_turtlesim(); //
+        }
+        Last_PS = PS; // PSボタンの状態を保存
 
         // 以降、twist_を操作する
 
@@ -108,7 +117,7 @@ private:
             LS_Y *= 0.3;
             RS_X *= 0.3;
         }
-        Last_CIRCLE = CIRCLE;  // ボタンの状態を保存
+        Last_CIRCLE = CIRCLE;  // 〇ボタンの状態を保存
 
         twist_.linear.x = LS_Y * MAX_LINEAR;    // 前進(up)・後退(down)
 
@@ -127,11 +136,19 @@ private:
     void publisher_timer_callback() {
         publisher_->publish(twist_);
     }
+    
+    //request 
+    void reset_turtlesim() {//ここも追加 このrequest? でreset 用のrequestを送る
+        auto req = std::make_shared
+            <std_srvs::srv::Empty::Request>();
+        reset_client_->async_send_request(req);     
+    }
 
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
     rclcpp::TimerBase::SharedPtr timer_;
 
+    rclcpp::Client<std_srvs::srv::Empty>::SharedPtr reset_client_;//ここ追加した。requestやpublishのときはここも忘れずに でもここなにしてるかわからない たぶん変数の定義？
     geometry_msgs::msg::Twist twist_; // 0で初期化される
 };
 

@@ -10,9 +10,10 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 
 add_executable(ps4_turtle src/PS4_Turtle_Teleop.cpp)
-ament_target_dependencies(ps4_turtle rclcpp sensor_msgs geometry_msgs)
+ament_target_dependencies(ps4_turtle rclcpp sensor_msgs geometry_msgs std_srvs)
 
 # インストール設定
 install(TARGETS
