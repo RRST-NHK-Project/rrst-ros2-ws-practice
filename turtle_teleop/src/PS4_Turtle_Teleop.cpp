@@ -26,10 +26,12 @@ SPDX-License-Identifier: MIT
 #define MAX_LINEAR 2.0  // [m/s]
 #define MAX_ANGULAR 2.0 // [rad/s]
 
-class PS4TurtleTeleop : public rclcpp::Node {
+class PS4TurtleTeleop : public rclcpp::Node
+{
 public:
     PS4TurtleTeleop()
-        : Node("ps4_turtle_teleop") {
+        : Node("ps4_turtle_teleop")
+    {
 
         /*
         turtlesimに送信される速度指令"twist_"（geometry_msgs/msg/Twist）
@@ -49,29 +51,31 @@ public:
         publisher_ = this->create_publisher<geometry_msgs::msg::Twist>(
             "turtle1/cmd_vel", 10);
 
-        //これもturtlesimにpublish?
-        reset_client_ = this->create_client<std_srvs::srv::Empty>("reset");  
+        // turtlesimにrequest
+        reset_client_ = this->create_client<std_srvs::srv::Empty>("reset");
         // timer_callbackを呼び出すタイマーを作成
         timer_ = create_wall_timer(
             std::chrono::milliseconds(PUBLISH_RATE_MS),
             std::bind(&PS4TurtleTeleop::publisher_timer_callback, this));
 
-
         RCLCPP_INFO(get_logger(), "ps4_turtle_teleop started.");
     }
 
 private:
-    void ps4_listener_callback(const sensor_msgs::msg::Joy::SharedPtr msg) {
+    void ps4_listener_callback(const sensor_msgs::msg::Joy::SharedPtr msg)
+    {
+
+        int scale = 1; // 速度の倍率。R1ボタンで*2、〇ボタンで*0.3
 
         // コントローラーの入力を取得、使う入力のコメントアウトを外す
         // float LS_X = msg->axes[0];  // 左: +1
-        float LS_Y = msg->axes[1];  // 上: +1
-        float RS_X = msg->axes[3];  // 左: +1
+        float LS_Y = msg->axes[1]; // 上: +1
+        float RS_X = msg->axes[3]; // 左: +1
         // float RS_Y = msg->axes[4];  // 上: +1
 
         // bool CROSS = msg->buttons[0];
         bool CIRCLE = msg->buttons[1];
-        static bool Last_CIRCLE = false;
+        static bool Last_circle = false;
         static bool low_speed_mode = false;
         // bool TRIANGLE = msg->buttons[2];
         // bool SQUARE = msg->buttons[3];
@@ -82,48 +86,51 @@ private:
         // bool DOWN = msg->axes[7] == -1.0;
 
         // bool L1 = msg->buttons[4];
-         bool R1 = msg->buttons[5];
+        bool R1 = msg->buttons[5];
 
         // bool SHARE = msg->buttons[8];
         // bool OPTION = msg->buttons[9];
         bool PS = msg->buttons[10];
-        static bool Last_PS = false;
+        static bool Last_ps = false;
 
-        if (PS && !Last_PS) {  // PSボタンが押された瞬間リセット
+        if (PS && !Last_ps)
+        {                      // PSボタンが押された瞬間リセット
             reset_turtlesim(); //
         }
-        Last_PS = PS; // PSボタンの状態を保存
+        Last_ps = PS; // PSボタンの状態を保存
 
         // 以降、twist_を操作する
 
-        if(std::fabs(LS_Y) < DEADZONE_L){       //スティックのドリフト対策   
-            LS_Y = 0.0;                 
+        if (std::fabs(LS_Y) < DEADZONE_L)
+        { // スティックのドリフト対策
+            LS_Y = 0.0;
         }
 
-        if(std::fabs(RS_X) < DEADZONE_R){       //スティックのドリフト対策   
-            RS_X = 0.0;                 
+        if (std::fabs(RS_X) < DEADZONE_R)
+        { // スティックのドリフト対策
+            RS_X = 0.0;
         }
 
-        if(R1){   // R1ボタンが押されているときは速度をブースト
-            LS_Y *= 2.0;
-            RS_X *= 2.0;
+        if (R1)
+        { // R1ボタンが押されているときは速度をブースト
+            scale *= 2.0;
         }
 
-        if(CIRCLE && !Last_CIRCLE){  // 〇ボタンで低速モード切り替え
+        if (CIRCLE && !Last_circle)
+        { // 〇ボタンで低速モード切り替え
             low_speed_mode = !low_speed_mode;
+            RCLCPP_INFO(get_logger(), "low_speed_mode=%s", low_speed_mode ? "ON" : "OFF");
+        }//RCLCPP_INFO(get_logger(), "文字列:%s" , hogehoge ? "yes" : "no");  // これでnode上にメッセージがパブリッシュされるの？
+
+        if (low_speed_mode)
+        { // 低速モードのときは速度を0.3倍にする
+            scale *= 0.3;
         }
+        Last_circle = CIRCLE; // 〇ボタンの状態を保存
 
-        if(low_speed_mode){  // 低速モードのときは速度を半分にする
-            LS_Y *= 0.3;
-            RS_X *= 0.3;
-        }
-        Last_CIRCLE = CIRCLE;  // 〇ボタンの状態を保存
+        twist_.linear.x = LS_Y * MAX_LINEAR * scale; // 前進(up)・後退(down)
 
-        twist_.linear.x = LS_Y * MAX_LINEAR;    // 前進(up)・後退(down)
-
-        twist_.angular.z = RS_X * MAX_ANGULAR;  // 右旋回(left)・左旋回(right)
-
-
+        twist_.angular.z = RS_X * MAX_ANGULAR * scale; // 右旋回(right)・左旋回(left)
 
         // デバッグ用
         // RCLCPP_INFO(get_logger(), "linear.x=%.2f, angular.z=%.2f",
@@ -133,32 +140,35 @@ private:
     }
 
     // publish
-    void publisher_timer_callback() {
+    void publisher_timer_callback()
+    {
         publisher_->publish(twist_);
     }
-    
-    //request 
-    void reset_turtlesim() {//ここも追加 このrequest? でreset 用のrequestを送る
-        auto req = std::make_shared
-            <std_srvs::srv::Empty::Request>();
-        reset_client_->async_send_request(req);     
+
+    // request
+    void reset_turtlesim()
+    { // ここでreset 用のrequestを送る
+        auto req = std::make_shared<std_srvs::srv::Empty::Request>();
+        reset_client_->async_send_request(req);
     }
 
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
     rclcpp::TimerBase::SharedPtr timer_;
 
-    rclcpp::Client<std_srvs::srv::Empty>::SharedPtr reset_client_;//ここ追加した。requestやpublishのときはここも忘れずに でもここなにしてるかわからない たぶん変数の定義？
-    geometry_msgs::msg::Twist twist_; // 0で初期化される
+    rclcpp::Client<std_srvs::srv::Empty>::SharedPtr reset_client_; // ここでreset_turtlesim用のreset_client変数の定義
+    geometry_msgs::msg::Twist twist_;                              // 0で初期化される
 };
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     rclcpp::init(argc, argv);
 
     // figletでノード名を表示
     std::string figletout = "figlet PS4 Turtle Teleop";
     int result = std::system(figletout.c_str());
-    if (result != 0) {
+    if (result != 0)
+    {
         std::cerr << "Please install 'figlet' with: sudo apt install figlet" << std::endl;
     }
 
