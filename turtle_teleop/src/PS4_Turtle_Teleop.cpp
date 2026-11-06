@@ -61,12 +61,14 @@ private:
 
         // コントローラーの入力を取得、使う入力のコメントアウトを外す
         // float LS_X = msg->axes[0];  // 左: +1
-        // float LS_Y = msg->axes[1];  // 上: +1
-        // float RS_X = msg->axes[3];  // 左: +1
+        float LS_Y = msg->axes[1];  // 上: +1
+        float RS_X = msg->axes[3];  // 左: +1
         // float RS_Y = msg->axes[4];  // 上: +1
 
         // bool CROSS = msg->buttons[0];
-        // bool CIRCLE = msg->buttons[1];
+        bool CIRCLE = msg->buttons[1];
+        static bool Last_CIRCLE = false;
+        static bool low_speed_mode = false;
         // bool TRIANGLE = msg->buttons[2];
         // bool SQUARE = msg->buttons[3];
 
@@ -76,13 +78,43 @@ private:
         // bool DOWN = msg->axes[7] == -1.0;
 
         // bool L1 = msg->buttons[4];
-        // bool R1 = msg->buttons[5];
+         bool R1 = msg->buttons[5];
 
         // bool SHARE = msg->buttons[8];
         // bool OPTION = msg->buttons[9];
         // bool PS = msg->buttons[10];
 
+
         // 以降、twist_を操作する
+
+        if(std::fabs(LS_Y) < DEADZONE_L){       //スティックのドリフト対策   
+            LS_Y = 0.0;                 
+        }
+
+        if(std::fabs(RS_X) < DEADZONE_R){       //スティックのドリフト対策   
+            RS_X = 0.0;                 
+        }
+
+        if(R1){   // R1ボタンが押されているときは速度をブースト
+            LS_Y *= 2.0;
+            RS_X *= 2.0;
+        }
+
+        if(CIRCLE && !Last_CIRCLE){  // 〇ボタンで低速モード切り替え
+            low_speed_mode = !low_speed_mode;
+        }
+
+        if(low_speed_mode){  // 低速モードのときは速度を半分にする
+            LS_Y *= 0.3;
+            RS_X *= 0.3;
+        }
+        Last_CIRCLE = CIRCLE;  // ボタンの状態を保存
+
+        twist_.linear.x = LS_Y * MAX_LINEAR;    // 前進(up)・後退(down)
+
+        twist_.angular.z = RS_X * MAX_ANGULAR;  // 右旋回(left)・左旋回(right)
+
+
 
         // デバッグ用
         // RCLCPP_INFO(get_logger(), "linear.x=%.2f, angular.z=%.2f",
