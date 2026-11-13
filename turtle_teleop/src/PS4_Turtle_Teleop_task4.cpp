@@ -25,10 +25,12 @@ SPDX-License-Identifier: MIT
 #define MAX_LINEAR 2.0  // [m/s]
 #define MAX_ANGULAR 2.0 // [rad/s]
 
-class PS4TurtleTeleop : public rclcpp::Node {
+class PS4TurtleTeleop : public rclcpp::Node
+{
 public:
     PS4TurtleTeleop()
-        : Node("ps4_turtle_teleop") {
+        : Node("ps4_turtle_teleop")
+    {
 
         /*
         turtlesimに送信される速度指令"twist_"（geometry_msgs/msg/Twist）
@@ -57,12 +59,13 @@ public:
     }
 
 private:
-    void ps4_listener_callback(const sensor_msgs::msg::Joy::SharedPtr msg) {
+    void ps4_listener_callback(const sensor_msgs::msg::Joy::SharedPtr msg)
+    {
 
         // コントローラーの入力を取得、使う入力のコメントアウトを外す
         // float LS_X = msg->axes[0];  // 左: +1
-        float LS_Y = msg->axes[1];  // 上: +1
-        float RS_X = msg->axes[3];  // 左: +1
+        float LS_Y = msg->axes[1]; // 上: +1
+        float RS_X = msg->axes[3]; // 左: +1
         // float RS_Y = msg->axes[4];  // 上: +1
 
         // bool CROSS = msg->buttons[0];
@@ -84,23 +87,26 @@ private:
 
         // 以降、twist_を操作する
 
-        
         static bool last_circle = false;
         static bool slow_mode = false;
+
         // 押した瞬間だけ true
-        if (CIRCLE && !last_circle) {
+        if (CIRCLE && !last_circle)
+        {
             slow_mode = !slow_mode;
-            }
+        }
+
         last_circle = CIRCLE;
 
-        double boost = 1.0;
-        
+        double slow = 1.0;
+
         if (slow_mode)
         {
-            boost = 0.3;
+            slow = 0.3;
         }
-        twist_.linear.x = LS_Y *MAX_LINEAR * boost;
-        twist_.angular.z = RS_X * MAX_ANGULAR * boost;
+
+        twist_.linear.x = LS_Y * MAX_LINEAR * slow;
+        twist_.angular.z = RS_X * MAX_ANGULAR * slow;
 
         // デバッグ用
         // RCLCPP_INFO(get_logger(), "linear.x=%.2f, angular.z=%.2f",
@@ -110,7 +116,8 @@ private:
     }
 
     // publish
-    void publisher_timer_callback() {
+    void publisher_timer_callback()
+    {
         publisher_->publish(twist_);
     }
 
@@ -121,13 +128,15 @@ private:
     geometry_msgs::msg::Twist twist_; // 0で初期化される
 };
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     rclcpp::init(argc, argv);
 
     // figletでノード名を表示
     std::string figletout = "figlet PS4 Turtle Teleop";
     int result = std::system(figletout.c_str());
-    if (result != 0) {
+    if (result != 0)
+    {
         std::cerr << "Please install 'figlet' with: sudo apt install figlet" << std::endl;
     }
 
