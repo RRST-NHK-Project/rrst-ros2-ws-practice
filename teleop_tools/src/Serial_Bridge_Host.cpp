@@ -17,8 +17,8 @@ SPDX-License-Identifier: MIT
 #include <std_msgs/msg/int32_multi_array.hpp>
 
 // 以下マイコンに合わせて設定
-#define TX_DEVICE_ID 1 // 送信先マイコンのID
-#define RX_DEVICE_ID 1 // 受信先マイコンのID
+#define TX_DEVICE_ID 2 // 送信先マイコンのID
+#define RX_DEVICE_ID 2 // 受信先マイコンのID
 
 #define TX16NUM 24 // 送信データ数
 #define RX16NUM 17 // 受信データ数
@@ -100,7 +100,7 @@ private:
 
         // コントローラーの入力を取得、使わない入力はコメントアウト推奨
         // float LS_X = -1 * msg->axes[0];
-        // float LS_Y = msg->axes[1];
+        float LS_Y = msg->axes[1];
         // float RS_X = -1 * msg->axes[3];
         // float RS_Y = msg->axes[4];
 
@@ -137,6 +137,11 @@ private:
         // static bool share_latch = false;
 
         // 以降、配列data_を操作する
+        if (std::abs(LS_Y) < DEADZONE_L) {
+            LS_Y = 0.0;
+        }
+
+        data_[9] = static_cast<int16_t>(135 + LS_Y * 135); // Servo1の角度を0~270に変換して格納
 
         // デバッグ用
         // RCLCPP_INFO(
